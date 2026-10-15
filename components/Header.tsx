@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArrowLeft, Bell, BellOff, Info, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, Bell, BellOff, Info, Sun, Moon, Download } from 'lucide-react';
 import { HabitTab } from '@/lib/types';
 import { requestNotificationPermission } from '@/lib/notifications';
 import { Logo } from '@/components/Logo';
@@ -13,6 +13,7 @@ interface HeaderProps {
   onToggleNotifications: () => void;
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
+  onOpenInstall?: () => void;
 }
 
 export function Header({
@@ -22,6 +23,7 @@ export function Header({
   onToggleNotifications,
   theme,
   onToggleTheme,
+  onOpenInstall,
 }: HeaderProps) {
   const handleNotificationClick = async () => {
     if (!notificationsEnabled) {
@@ -149,6 +151,20 @@ export function Header({
               <BellOff className="w-5 h-5 text-slate-400" />
             )}
           </button>
+
+          {/* Download / Install App Button */}
+          {onOpenInstall && (
+            <button
+              type="button"
+              onClick={onOpenInstall}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-900/60 font-bold text-xs transition active:scale-95 cursor-pointer shadow-2xs"
+              title="Baixar App com seu Ícone"
+              aria-label="Baixar App com seu Ícone"
+            >
+              <Download className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <span className="hidden sm:inline">Baixar App</span>
+            </button>
+          )}
 
           {/* About / Settings Modal */}
           <button

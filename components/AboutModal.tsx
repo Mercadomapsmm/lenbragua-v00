@@ -21,12 +21,14 @@ interface AboutModalProps {
   onRestoreData: (data: AppData) => void;
   onClose: () => void;
   onSetTheme?: (theme: 'light' | 'dark') => void;
+  onOpenInstall?: () => void;
 }
 
 export function AboutModal({
   appData,
   onRestoreData,
   onSetTheme,
+  onOpenInstall,
 }: AboutModalProps) {
   const [activeTab, setActiveTab] = useState<'sobre' | 'codigo' | 'backup'>('sobre');
   const [rating, setRating] = useState<number>(5);
@@ -165,6 +167,35 @@ export function AboutModal({
           </button>
         </div>
       </div>
+
+      {/* Download App with Icon Banner */}
+      {onOpenInstall && (
+        <button
+          type="button"
+          onClick={onOpenInstall}
+          className="w-full p-4 rounded-3xl bg-gradient-to-r from-sky-50 via-teal-50/50 to-white dark:from-slate-850 dark:to-slate-900 border-2 border-sky-200 dark:border-slate-700 flex items-center justify-between gap-3 text-left hover:border-sky-400 dark:hover:border-sky-500 transition cursor-pointer shadow-xs group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition shrink-0">
+              <Download className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="text-sm font-black text-slate-900 dark:text-white flex items-center gap-2">
+                Baixar App com Ícone
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
+                  Instalável
+                </span>
+              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Fixe o ícone oficial na tela inicial do celular ou baixe os arquivos
+              </div>
+            </div>
+          </div>
+          <span className="text-xs font-bold px-3 py-1.5 rounded-xl bg-sky-600 text-white shadow-xs group-hover:bg-sky-700 shrink-0">
+            Abrir
+          </span>
+        </button>
+      )}
 
       {/* Tabs */}
       <div className="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl text-xs font-bold text-slate-600 dark:text-slate-300">

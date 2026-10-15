@@ -3,7 +3,7 @@ import type { MetadataRoute } from 'next';
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: '/',
-    name: 'Lembragua.online',
+    name: 'Lembragua.online - Água e Remédios',
     short_name: 'Lembragua',
     description: 'Aplicativo gratuito e leve para cuidar de hábitos essenciais: beber água e tomar remédios. 100% offline, fácil e sem cadastro.',
     start_url: '/',
@@ -11,6 +11,7 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     background_color: '#F8FAFC',
     theme_color: '#0284C7',
+    orientation: 'portrait',
     icons: [
       {
         src: '/icon.svg',
@@ -29,6 +30,12 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
+      },
+      {
+        src: '/icon-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
       },
     ],
   };

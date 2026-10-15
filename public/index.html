@@ -6,8 +6,9 @@
   <title>Lembragua.online - Água e Remédios</title>
   <meta name="description" content="Aplicativo gratuito e leve para cuidar de hábitos essenciais: beber água e tomar remédios. 100% offline, fácil e sem cadastro.">
   <meta name="theme-color" content="#0284c7">
-  <link rel="icon" type="image/svg+xml" href="/icon.svg">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -34,6 +35,7 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
 
   <style>
+    /* Custom scrollbar and transitions */
     * {
       -webkit-tap-highlight-color: transparent;
     }
@@ -59,5 +61,12 @@
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen selection:bg-sky-200 transition-colors">
   <div id="root"></div>
   <script src="index.js" defer></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('sw.js').catch(function() {});
+      });
+    }
+  </script>
 </body>
 </html>

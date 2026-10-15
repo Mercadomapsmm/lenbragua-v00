@@ -192,6 +192,23 @@
   // Medicine screen state
   let isMedModalOpen = false;
   let editingMedId = null;
+
+  // PWA install state
+  let isInstallModalOpen = false;
+  let deferredPrompt = null;
+  let installGuideTab = 'android';
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      renderApp();
+    });
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      renderApp();
+    });
+  }
   let confirmingDeleteMedId = null;
   let selectedMedHistoryDayKey = null;
 
@@ -316,6 +333,7 @@
         </main>
         ${renderBottomNav()}
         ${isMedModalOpen ? renderMedicineModal() : ''}
+        ${isInstallModalOpen ? renderInstallModal() : ''}
       </div>
     `;
 
@@ -401,6 +419,17 @@
                 <span>Dark</span>
               </button>
             </div>
+
+            <!-- Baixar App Button -->
+            <button
+              type="button"
+              data-action="open-install"
+              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 font-bold text-xs transition cursor-pointer shadow-2xs hover:bg-sky-100"
+              title="Baixar App com seu Ícone"
+            >
+              <span>📥</span>
+              <span class="hidden sm:inline">Baixar App</span>
+            </button>
 
             <!-- About Button -->
             <button type="button" data-action="nav-about" class="p-2 rounded-xl border transition cursor-pointer ${
@@ -505,6 +534,36 @@
                 style="width: ${(completedHabitsCount / maxHabits) * 100}%"
               ></div>
             </div>
+          </div>
+        </div>
+
+        <!-- Baixar App com Ícone Banner -->
+        <div
+          data-action="open-install"
+          class="p-4 rounded-3xl bg-gradient-to-r from-sky-50 via-teal-50/50 to-white dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border-2 border-sky-200/80 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-600 shadow-xs hover:shadow-md transition-all cursor-pointer flex items-center justify-between gap-3 group"
+        >
+          <div class="flex items-center gap-3.5 min-w-0">
+            <div class="w-12 h-12 rounded-2xl bg-sky-100 dark:bg-sky-950/70 p-1 flex items-center justify-center shrink-0 shadow-xs">
+              <img src="icon.svg" alt="Ícone" class="w-full h-full" />
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-black text-slate-900 dark:text-white text-sm truncate">
+                  Baixar App com Ícone
+                </span>
+                <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300">
+                  Instalar no Celular
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                Adicione o Lembragua na tela inicial ou baixe arquivos e ícones
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1 shrink-0 px-3 py-2 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-xs group-hover:scale-105 transition">
+            <span>📥</span>
+            <span class="hidden sm:inline">Baixar</span>
           </div>
         </div>
 
@@ -1756,6 +1815,30 @@
             </p>
           </div>
 
+          <!-- Download App com Ícone -->
+          <div
+            data-action="open-install"
+            class="p-4 bg-gradient-to-r from-sky-50 to-teal-50/50 dark:from-slate-800 dark:to-slate-800/80 rounded-2xl border-2 border-sky-200 dark:border-slate-700 flex items-center justify-between gap-3 cursor-pointer hover:border-sky-400 transition group"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-2xl group-hover:scale-110 transition">📲</span>
+              <div>
+                <h4 class="font-black text-slate-900 dark:text-white text-xs flex items-center gap-2">
+                  Baixar App com Ícone
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
+                    Instalável
+                  </span>
+                </h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                  Fixe na tela do celular ou baixe arquivos PNG, SVG e HTML
+                </p>
+              </div>
+            </div>
+            <span class="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-xl shadow-xs shrink-0">
+              Abrir
+            </span>
+          </div>
+
           <!-- Backup e Restauração -->
           <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
             <h4 class="text-xs font-bold text-slate-800 dark:text-white">Backup e Restauração de Dados:</h4>
@@ -2079,6 +2162,286 @@
     `;
   }
 
+  function triggerFileDownload(url, filename) {
+    try {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast(`${filename} baixado com sucesso!`);
+    } catch {
+      window.open(url, '_blank');
+    }
+  }
+
+  function renderInstallModal() {
+    const isStandalone =
+      typeof window !== 'undefined' &&
+      (window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true);
+
+    return `
+      <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fade-in" id="install-modal-backdrop">
+        <div class="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
+          <!-- Modal Header -->
+          <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-sky-50/70 via-teal-50/40 to-white dark:from-slate-900 dark:to-slate-850">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-950/70 flex items-center justify-center text-sky-600 text-xl font-bold">
+                📥
+              </div>
+              <div>
+                <h3 class="text-lg font-black text-slate-900 dark:text-white tracking-tight">
+                  Baixar App com seu Ícone
+                </h3>
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  Instale na tela inicial do celular ou baixe os arquivos
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              data-action="close-install"
+              class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-lg leading-none"
+              aria-label="Fechar"
+            >
+              ✕
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="p-5 overflow-y-auto space-y-5 text-sm">
+            <!-- App Icon Showcase Card -->
+            <div class="p-4 rounded-3xl bg-gradient-to-b from-sky-50/60 to-white dark:from-slate-850 dark:to-slate-900 border-2 border-sky-100 dark:border-slate-800 flex items-center gap-4 shadow-xs">
+              <div class="relative shrink-0">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-sky-500 via-teal-500 to-amber-500 p-1 shadow-md flex items-center justify-center">
+                  <img src="icon.svg" alt="Ícone Lembragua.online" class="w-full h-full rounded-2xl bg-white p-1" />
+                </div>
+                <span class="absolute -bottom-1 -right-1 flex h-4 w-4">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white dark:border-slate-900"></span>
+                </span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <h4 class="font-black text-slate-900 dark:text-white text-base truncate">
+                    Lembragua.online
+                  </h4>
+                  <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950 text-sky-800 dark:text-sky-300">
+                    Ícone Oficial
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Água & Remédios • 100% Offline • Sem cadastro
+                </p>
+                <div class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
+                  <span>✨</span> Fixa direto na tela do seu aparelho com este ícone
+                </div>
+              </div>
+            </div>
+
+            ${
+              deferredPrompt
+                ? `
+              <div class="p-4 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold text-sky-900 dark:text-sky-200">⚡ Instalação Direta Pronta:</span>
+                  <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-300">1 Toque</span>
+                </div>
+                <button
+                  type="button"
+                  data-action="trigger-install"
+                  class="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-sky-600 to-teal-600 hover:from-sky-700 hover:to-teal-700 text-white font-extrabold text-sm shadow-md hover:shadow-lg transition active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>📲</span>
+                  <span>Instalar Agora no Aparelho</span>
+                </button>
+              </div>
+            `
+                : ''
+            }
+
+            ${
+              isStandalone
+                ? `
+              <div class="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-2.5">
+                <span class="text-emerald-600 text-lg">✓</span>
+                <div>
+                  <p class="font-black">Aplicativo Já Instalado!</p>
+                  <p class="text-[11px] font-normal text-emerald-700 dark:text-emerald-300">O Lembragua.online já está instalado com seu ícone oficial.</p>
+                </div>
+              </div>
+            `
+                : ''
+            }
+
+            <!-- Step-by-Step Instructions by Device -->
+            <div class="space-y-3">
+              <h4 class="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider">
+                Como adicionar o ícone à tela inicial:
+              </h4>
+
+              <div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl">
+                <button
+                  type="button"
+                  data-action="set-install-guide"
+                  data-guide="android"
+                  class="py-2 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    installGuideTab === 'android'
+                      ? 'bg-white dark:bg-slate-700 text-sky-700 dark:text-sky-300 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }"
+                >
+                  📱 Android
+                </button>
+                <button
+                  type="button"
+                  data-action="set-install-guide"
+                  data-guide="ios"
+                  class="py-2 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    installGuideTab === 'ios'
+                      ? 'bg-white dark:bg-slate-700 text-sky-700 dark:text-sky-300 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }"
+                >
+                  🍎 iPhone
+                </button>
+                <button
+                  type="button"
+                  data-action="set-install-guide"
+                  data-guide="pc"
+                  class="py-2 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    installGuideTab === 'pc'
+                      ? 'bg-white dark:bg-slate-700 text-sky-700 dark:text-sky-300 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400'
+                  }"
+                >
+                  💻 PC / Mac
+                </button>
+              </div>
+
+              ${
+                installGuideTab === 'android'
+                  ? `
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                  <div class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px]">✓</span>
+                    No Chrome ou Samsung Internet (Android):
+                  </div>
+                  <ol class="space-y-1.5 text-slate-600 dark:text-slate-300 list-decimal list-inside pl-1 font-medium">
+                    <li>Toque nos <strong>três pontinhos (⋮)</strong> no topo do navegador.</li>
+                    <li>Toque em <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.</li>
+                    <li>Confirme o nome <strong>Lembragua.online</strong>.</li>
+                    <li>O ícone aparecerá na tela do seu aparelho!</li>
+                  </ol>
+                </div>
+              `
+                  : installGuideTab === 'ios'
+                  ? `
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                  <div class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>📤</span> No Safari do iPhone / iPad:
+                  </div>
+                  <ol class="space-y-1.5 text-slate-600 dark:text-slate-300 list-decimal list-inside pl-1 font-medium">
+                    <li>No Safari, toque no botão <strong>Compartilhar</strong> (quadrado com seta para cima na barra inferior).</li>
+                    <li>Role para baixo e selecione <strong>"Adicionar à Tela de Início"</strong>.</li>
+                    <li>Verifique o ícone do Lembragua e toque em <strong>Adicionar</strong>.</li>
+                    <li>O app abrirá em tela cheia como aplicativo nativo!</li>
+                  </ol>
+                </div>
+              `
+                  : `
+                <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2 text-xs">
+                  <div class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <span>💻</span> No Computador (Chrome, Edge ou Opera):
+                  </div>
+                  <ol class="space-y-1.5 text-slate-600 dark:text-slate-300 list-decimal list-inside pl-1 font-medium">
+                    <li>Olhe na barra de endereços (ao lado da estrela de favoritos).</li>
+                    <li>Clique no botão <strong>"Instalar Lembragua.online"</strong>.</li>
+                    <li>O atalho com ícone será criado na sua área de trabalho.</li>
+                  </ol>
+                </div>
+              `
+              }
+            </div>
+
+            <!-- Direct Download of Files and Icons -->
+            <div class="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-3">
+              <h4 class="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider">
+                Baixar Arquivos e Ícones Diretamente:
+              </h4>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <button
+                  type="button"
+                  data-action="download-icon-png"
+                  class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 transition flex items-center gap-3 text-left cursor-pointer"
+                >
+                  <span class="text-2xl">🖼️</span>
+                  <div>
+                    <div class="text-xs font-black text-slate-800 dark:text-white">Ícone PNG (512x512)</div>
+                    <div class="text-[11px] text-slate-500">Alta resolução para celular</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  data-action="download-icon-svg"
+                  class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 transition flex items-center gap-3 text-left cursor-pointer"
+                >
+                  <span class="text-2xl">🎨</span>
+                  <div>
+                    <div class="text-xs font-black text-slate-800 dark:text-white">Ícone Vetorial (SVG)</div>
+                    <div class="text-[11px] text-slate-500">Arquivo vetorial original</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  data-action="download-app-html"
+                  class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 transition flex items-center gap-3 text-left cursor-pointer"
+                >
+                  <span class="text-2xl">📄</span>
+                  <div>
+                    <div class="text-xs font-black text-slate-800 dark:text-white">App Offline (index.html)</div>
+                    <div class="text-[11px] text-slate-500">Abre sem precisar de internet</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  data-action="download-apple-icon"
+                  class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-slate-750 border border-slate-200 dark:border-slate-700 transition flex items-center gap-3 text-left cursor-pointer"
+                >
+                  <span class="text-2xl">🍎</span>
+                  <div>
+                    <div class="text-xs font-black text-slate-800 dark:text-white">Ícone iOS (Apple)</div>
+                    <div class="text-[11px] text-slate-500">apple-touch-icon 192px</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-850 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <span class="text-[11px] text-slate-500 dark:text-slate-400">
+              Lembragua.online • 100% Gratuito
+            </span>
+            <button
+              type="button"
+              data-action="close-install"
+              class="px-5 py-2 rounded-xl bg-slate-200 dark:bg-slate-750 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition cursor-pointer"
+            >
+              Fechar
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // --- Global Event Delegation ---
   function attachEventListeners() {
     const root = document.getElementById('root');
@@ -2104,6 +2467,37 @@
         } else if (action === 'nav-about') {
           currentTab = 'about';
           renderApp();
+        } else if (action === 'open-install') {
+          isInstallModalOpen = true;
+          renderApp();
+        } else if (action === 'close-install') {
+          isInstallModalOpen = false;
+          renderApp();
+        } else if (action === 'set-install-guide') {
+          const guide = el.getAttribute('data-guide');
+          if (guide) {
+            installGuideTab = guide;
+            renderApp();
+          }
+        } else if (action === 'trigger-install') {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choice) => {
+              if (choice.outcome === 'accepted') {
+                showToast('Instalação aceita com sucesso!');
+                deferredPrompt = null;
+              }
+              renderApp();
+            });
+          }
+        } else if (action === 'download-icon-png') {
+          triggerFileDownload('icon-512.png', 'lembragua-icone-512.png');
+        } else if (action === 'download-icon-svg') {
+          triggerFileDownload('icon.svg', 'lembragua-icone.svg');
+        } else if (action === 'download-app-html') {
+          triggerFileDownload('index.html', 'lembragua-app.html');
+        } else if (action === 'download-apple-icon') {
+          triggerFileDownload('apple-touch-icon.png', 'apple-touch-icon.png');
         } else if (action === 'set-theme-light') {
           appData.settings.theme = 'light';
           saveData();

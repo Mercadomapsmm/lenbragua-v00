@@ -17,12 +17,14 @@ import { MedicineHabit } from '@/components/MedicineHabit';
 import { EvolutionScreen } from '@/components/EvolutionScreen';
 import { AboutModal } from '@/components/AboutModal';
 import { ActiveAlertBanner } from '@/components/ActiveAlertBanner';
+import { InstallAppModal } from '@/components/InstallAppModal';
 import { AnimatePresence, motion } from 'motion/react';
 import { WifiOff } from 'lucide-react';
 
 export default function Page() {
   const [data, updateData] = useAppData();
   const [currentTab, setCurrentTab] = useState<HabitTab>('home');
+  const [isInstallModalOpen, setIsInstallModalOpen] = useState(false);
   const [activeAlert, setActiveAlert] = useState<ActiveAlert | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() =>
     hasNotificationPermission()
@@ -160,6 +162,7 @@ export default function Page() {
         onToggleNotifications={() => setNotificationsEnabled((prev) => !prev)}
         theme={theme}
         onToggleTheme={handleToggleTheme}
+        onOpenInstall={() => setIsInstallModalOpen(true)}
       />
 
       {/* Active Floating Alert (Alarm Simulator & Trigger) */}
@@ -177,6 +180,12 @@ export default function Page() {
         </div>
       )}
 
+      {/* Modal for App Download / Installation with Icon */}
+      <InstallAppModal
+        isOpen={isInstallModalOpen}
+        onClose={() => setIsInstallModalOpen(false)}
+      />
+
       {/* Main Content Area with Smooth Page Transitions */}
       <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-4 sm:py-6">
         <AnimatePresence mode="wait">
@@ -192,6 +201,7 @@ export default function Page() {
                 data={data}
                 onSelectTab={setCurrentTab}
                 onQuickDrinkWater={handleQuickDrinkWater}
+                onOpenInstall={() => setIsInstallModalOpen(true)}
               />
             )}
             {currentTab === 'water' && (
@@ -223,6 +233,7 @@ export default function Page() {
                     settings: { ...prev.settings, theme: t },
                   }));
                 }}
+                onOpenInstall={() => setIsInstallModalOpen(true)}
               />
             )}
           </motion.div>

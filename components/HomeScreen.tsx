@@ -11,20 +11,25 @@ import {
   Plus,
   Sparkles,
   ShieldCheck,
+  Download,
+  Smartphone,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { sounds, triggerVibration } from '@/lib/sound';
+import { Logo } from '@/components/Logo';
 
 interface HomeScreenProps {
   data: AppData;
   onSelectTab: (tab: HabitTab) => void;
   onQuickDrinkWater: (amountMl: number) => void;
+  onOpenInstall?: () => void;
 }
 
 export function HomeScreen({
   data,
   onSelectTab,
   onQuickDrinkWater,
+  onOpenInstall,
 }: HomeScreenProps) {
   const todayStr = getTodayString();
 
@@ -131,6 +136,41 @@ export function HomeScreen({
         </div>
       </div>
 
+
+      {/* Install / Download App Banner */}
+      {onOpenInstall && (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={onOpenInstall}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpenInstall()}
+          className="p-4 rounded-3xl bg-gradient-to-r from-sky-50 via-teal-50/50 to-white dark:from-slate-900 dark:via-slate-850 dark:to-slate-900 border-2 border-sky-200/80 dark:border-slate-800 hover:border-sky-300 dark:hover:border-sky-600 shadow-xs hover:shadow-md transition-all active:scale-[0.99] cursor-pointer flex items-center justify-between gap-3 group"
+        >
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="relative shrink-0">
+              <Logo className="w-12 h-12 group-hover:scale-105 transition" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-black text-slate-900 dark:text-white text-sm truncate">
+                  Baixar App com Ícone
+                </span>
+                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300">
+                  Instalar no Celular
+                </span>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                Adicione o Lembragua na tela inicial ou baixe arquivos e ícones
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0 px-3 py-2 rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-xs group-hover:scale-105 transition">
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Baixar</span>
+          </div>
+        </div>
+      )}
 
       {/* 2 Big Cards - 1 Tap Away (Water and Medicine) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
