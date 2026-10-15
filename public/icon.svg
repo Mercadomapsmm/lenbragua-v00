@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E0F2FE" />
+      <stop offset="50%" stop-color="#F0FDF4" />
+      <stop offset="100%" stop-color="#FEF3C7" />
+    </linearGradient>
+    <linearGradient id="waterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+    <linearGradient id="pillTopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EF4444" />
+      <stop offset="100%" stop-color="#F87171" />
+    </linearGradient>
+    <linearGradient id="pillBottomGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#FBBF24" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#0F172A" flood-opacity="0.12" />
+    </filter>
+  </defs>
+
+  <!-- Background Base with rounded squircle -->
+  <rect x="24" y="24" width="464" height="464" rx="116" fill="url(#bg)" />
+  <rect x="24" y="24" width="464" height="464" rx="116" stroke="#BAE6FD" stroke-width="6" fill="none" />
+  
+  <!-- Center Main Card -->
+  <rect x="68" y="68" width="376" height="376" rx="76" fill="#FFFFFF" filter="url(#shadow)" />
+  
+  <!-- 1. ÁGUA (Left Card - Water Droplet) -->
+  <g transform="translate(96, 120)">
+    <rect width="144" height="272" rx="36" fill="#E0F2FE" />
+    <path d="M72 64 C72 64 32 120 32 152 C32 178 49 198 72 198 C95 198 112 178 112 152 C112 120 72 64 72 64 Z" fill="url(#waterGrad)" />
+    <!-- Droplet shine -->
+    <path d="M54 140 C54 126 62 112 74 108 C68 114 66 122 66 132 C66 142 72 150 72 150 C62 148 54 145 54 140 Z" fill="#BAE6FD" opacity="0.85" />
+    <text x="72" y="238" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="900" fill="#0284C7" text-anchor="middle">ÁGUA</text>
+  </g>
+  
+  <!-- 2. REMÉDIOS (Right Card - Capsule Pill) -->
+  <g transform="translate(272, 120)">
+    <rect width="144" height="272" rx="36" fill="#FEF3C7" />
+    <g transform="translate(72, 138) rotate(-40)">
+      <!-- Top half: Red -->
+      <rect x="-24" y="-56" width="48" height="56" rx="24" fill="url(#pillTopGrad)" />
+      <!-- Bottom half: Amber -->
+      <rect x="-24" y="0" width="48" height="56" rx="24" fill="url(#pillBottomGrad)" />
+      <!-- Seam line -->
+      <line x1="-24" y1="0" x2="24" y2="0" stroke="#FFFFFF" stroke-width="5" />
+      <!-- Pill reflection shine -->
+      <rect x="-14" y="-42" width="6" height="24" rx="3" fill="#FFFFFF" opacity="0.6" />
+    </g>
+    <text x="72" y="238" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="900" fill="#D97706" text-anchor="middle">REMÉDIO</text>
+  </g>
+  
+  <!-- Center Heart & Unity Emblem -->
+  <circle cx="256" cy="256" r="28" fill="#0284C7" stroke="#FFFFFF" stroke-width="6" />
+  <path d="M256 247 C256 247 246 238 240 244 C234 250 238 259 256 270 C274 259 278 250 272 244 C266 238 256 247 256 247 Z" fill="#FFFFFF" />
+</svg>
